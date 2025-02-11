@@ -35,7 +35,6 @@ TEST(CleanToken, SuffixCleaning) {
   ASSERT_THAT(cleanToken("hello."), StrEq("hello"));
   ASSERT_THAT(cleanToken("hello..."), StrEq("hello"));
   ASSERT_THAT(cleanToken("hello.\"!?"), StrEq("hello"));
-
   ASSERT_THAT(cleanToken("timesheet;"), StrEq("timesheet"));
   ASSERT_THAT(cleanToken("timesheet;.!"), StrEq("timesheet"));
   ASSERT_THAT(cleanToken("timesheet.,.!?"), StrEq("timesheet"));

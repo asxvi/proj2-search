@@ -16,7 +16,7 @@ string cleanToken(const string& token) {
 
   // find index of first alpha char
   for (int i = 0; i < token.size(); i++) {
-    if (isalpha(token[i]))
+    if (isalpha(token[i])) {
       firstAlpha = i;
       break;
     }
@@ -31,10 +31,14 @@ string cleanToken(const string& token) {
   
   if(firstAlpha == -1){return "";}
   if(lastAlpha == -1){return "";}
-;
-  return (token.substr(firstAlpha, lastAlpha-firstAlpha));
-}
 
+  string concated;
+  for(int i=firstAlpha; i<=lastAlpha; i++){
+    concated += tolower(token[i]);
+  }
+  
+  return concated;
+}
 set<string> gatherTokens(const string& text) {
   // TODO student
   return {};

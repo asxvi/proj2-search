@@ -7,6 +7,7 @@ using namespace std;
 
 string cleanToken(const string& token) {
   int firstAlpha = -1, lastAlpha = -1;
+  bool alphaPresent = false, alphaPresent2 = false;
 
   // find index of first alpha char
   for (int i = 0; i < token.size(); i++) {
@@ -25,8 +26,13 @@ string cleanToken(const string& token) {
   
   if(firstAlpha == -1){return "";}
   if(lastAlpha == -1){return "";}
-;
-  return (token.substr(firstAlpha, lastAlpha-firstAlpha));
+
+  string concated;
+  for(int i=firstAlpha; i<=lastAlpha; i++){
+    concated += tolower(token[i]);
+  }
+  
+  return concated;
 }
 
 
