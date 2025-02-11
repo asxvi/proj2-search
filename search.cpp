@@ -12,8 +12,27 @@
 using namespace std;
 
 string cleanToken(const string& token) {
-  // TODO student
-  return "";
+  int firstAlpha = -1, lastAlpha = -1;
+
+  // find index of first alpha char
+  for (int i = 0; i < token.size(); i++) {
+    if (isalpha(token[i])) {
+      firstAlpha = i;
+      break;
+    }
+  }
+
+  for (int i = token.size()-1; i >= 0; i--) {
+    if(isalpha(token[i])){
+      lastAlpha = i;
+      break;
+    }
+  }
+  
+  if(firstAlpha == -1){return "";}
+  if(lastAlpha == -1){return "";}
+;
+  return (token.substr(firstAlpha, lastAlpha-firstAlpha));
 }
 
 set<string> gatherTokens(const string& text) {

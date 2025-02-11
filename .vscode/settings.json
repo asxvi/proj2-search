@@ -10,4 +10,8 @@
   "C_Cpp.default.compilerPath": "/usr/bin/clang++",
   "debug.onTaskErrors": "abort",
   "lldb.showDisassembly": "never",
+  "files.associations": {
+    "iosfwd": "cpp",
+    "iostream": "cpp"
+  },
 }
