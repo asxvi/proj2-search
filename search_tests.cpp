@@ -72,18 +72,28 @@ TEST(CleanToken, SymbolCleaning) {
   ASSERT_THAT(cleanToken("<<<<<<XYz>>>>>>"), StrEq("xyz"));
 }
 
-TEST(GatherTokens, leadingSpace){
-  string text = "   Hello  my naMe   is    ALeX";
-  set<string> expected = {"Hello", "my", "name", "is", "alex"};
+
+
+// GatherTokens TEST CASES
+TEST(GatherTokens, LeadingSpace){
+  string text = "                 Hello my naMe is ALeX";
+  set<string> expected = {"hello", "my", "name", "is", "alex"};
 
   EXPECT_THAT(gatherTokens(text), ContainerEq(expected))
   << "text=\"" << text << "\"";
 }
 
+TEST(GatherTokens, TrailingSpaces){
+  string text = "Hello my naMe is ALeX                  ";
+  set<string> expected = {"hello", "my", "name", "is", "alex"};
 
-TEST(GatherTokens, trailingSpaces){
-  string text = "   Hello  my naMe   is    ALeX";
-  set<string> expected = {"Hello", "my", "name", "is", "alex"};
+  EXPECT_THAT(gatherTokens(text), ContainerEq(expected))
+  << "text=\"" << text << "\"";
+}
+
+TEST(GatherTokens, ManySpaces){
+  string text = "Hello   my      naMe    is ALeX";
+  set<string> expected = {"hello", "my", "name", "is", "alex"};
 
   EXPECT_THAT(gatherTokens(text), ContainerEq(expected))
   << "text=\"" << text << "\"";

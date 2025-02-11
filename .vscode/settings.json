@@ -12,6 +12,7 @@
   "lldb.showDisassembly": "never",
   "files.associations": {
     "iosfwd": "cpp",
-    "iostream": "cpp"
+    "iostream": "cpp",
+    "set": "cpp"
   },
 }

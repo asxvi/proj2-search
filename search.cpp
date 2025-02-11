@@ -40,8 +40,20 @@ string cleanToken(const string& token) {
   return concated;
 }
 set<string> gatherTokens(const string& text) {
-  // TODO student
-  return {};
+  set<string> words;
+  stringstream ss(text);
+  string curr;
+
+  while(ss >> curr && curr != ""){
+    words.insert(cleanToken(curr));
+  }
+  words.erase("");
+
+  // for(string s : words){
+  //   cout << s << endl;
+  // }
+
+  return words;
 }
 
 int buildIndex(const string& filename, map<string, set<string>>& index) {
