@@ -31,7 +31,7 @@ TEST(CleanToken, PrefixCleaning) {
 }
 
 // Tokens with punctuation at the end
-TEST(CleanToken, SuffixCleaning) { make test_clean_token
+TEST(CleanToken, SuffixCleaning) {
   ASSERT_THAT(cleanToken("hello."), StrEq("hello"));
   ASSERT_THAT(cleanToken("hello..."), StrEq("hello"));
   ASSERT_THAT(cleanToken("hello.\"!?"), StrEq("hello"));

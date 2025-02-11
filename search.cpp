@@ -16,7 +16,7 @@ string cleanToken(const string& token) {
 
   // find index of first alpha char
   for (int i = 0; i < token.size(); i++) {
-    if (isalpha(token[i])) {
+    if (isalpha(token[i]))
       firstAlpha = i;
       break;
     }
