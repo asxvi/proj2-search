@@ -72,8 +72,6 @@ TEST(CleanToken, SymbolCleaning) {
   ASSERT_THAT(cleanToken("<<<<<<XYz>>>>>>"), StrEq("xyz"));
 }
 
-
-
 // GatherTokens TEST CASES
 TEST(GatherTokens, LeadingSpace){
   string text = "                 Hello my naMe is ALeX";
@@ -98,5 +96,59 @@ TEST(GatherTokens, ManySpaces){
   EXPECT_THAT(gatherTokens(text), ContainerEq(expected))
   << "text=\"" << text << "\"";
 }
+
+// buildIndex TEST CASES
+
+
+// check that the output of running buildIndex results in an int >= 1 bc that means that atleast one url was read
+TEST(BuildIndex, NoFile){
+    string filename = "idontexist.txt"
+    string f_expected = not
+    string retTestFeedback =
+      "buildIndex(\"" + filename + "\", ...) file not found \n";
+    EXPECT_THAT(filename, Eq())    
+}
+
+TEST(BuildIndex, TinyTxt) {
+  string filename = "data/tiny.txt";
+
+  map<string, set<string>> expectedIndex = {
+      {"gre-en", {"www.rainbow.org"}},
+      {"orange", {"www.rainbow.org"}},
+      {"yellow", {"www.rainbow.org"}},
+      {"indigo", {"www.rainbow.org"}},
+      {"violet", {"www.rainbow.org"}},
+
+      {"blue", {"www.dr.seuss.net","www.rainbow.org"}},
+      {"red", {"www.dr.seuss.net", "www.rainbow.org"}},
+      {"one", {"www.dr.seuss.net"}},
+      {"two", {"www.dr.seuss.net"}},
+      {"fish", {"www.dr.seuss.net", "www.shoppinglist.com"}},
+
+      {"eggs", {"www.shoppinglist.com"}},
+      {"milk", {"www.shoppinglist.com"}},
+      {"bread", {"www.shoppinglist.com"}},
+      {"cheese", {"www.shoppinglist.com"}},
+
+      {"i'm", {"www.bigbadwolf.com"}},
+      {"not", {"www.bigbadwolf.com"}},
+      {"trying", {"www.bigbadwolf.com"}},
+      {"to", {"www.bigbadwolf.com"}},
+      {"eat", {"www.bigbadwolf.com"}},
+      {"you", {"www.bigbadwolf.com"}}
+  };
+  map<string, set<string>> studentIndex;
+  int studentNumProcesed = buildIndex(filename, studentIndex);
+
+  string indexTestFeedback =
+      "buildIndex(\"" + filename + "\", ...) index incorrect\n";
+  EXPECT_THAT(studentIndex, ContainerEq(expectedIndex)) << indexTestFeedback;
+
+  string retTestFeedback =
+      "buildIndex(\"" + filename + "\", ...) return value incorrect\n";
+  EXPECT_THAT(studentNumProcesed, Eq(4)) << retTestFeedback;
+}
+
+
 
 }  // namespace

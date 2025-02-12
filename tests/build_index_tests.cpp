@@ -33,5 +33,4 @@ TEST(BuildIndex, TinierTxt) {
       "buildIndex(\"" + filename + "\", ...) return value incorrect\n";
   EXPECT_THAT(studentNumProcesed, Eq(2)) << retTestFeedback;
 }
-
 }  // namespace

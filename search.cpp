@@ -56,13 +56,34 @@ set<string> gatherTokens(const string& text) {
   return words;
 }
 
-int buildIndex(const string& filename, map<string, set<string>>& index) {
-  // TODO student
-  return 0;
+int buildIndex(const string& filename, map<string, set<string> >& index) {
+  fstream file(filename);
+  string line, url;
+  int numWebp = 0;
+
+  if(file.is_open()){
+    int i=1;
+    while(getline(file, line)){
+      if(i%2 ==0){
+        set<string> tokens = gatherTokens(line);
+
+        for(string s : tokens){
+          index[s].insert(url);
+        }
+      }
+      else{
+        url = line;
+        numWebp ++;
+      }
+      i++;
+    }
+  }
+
+
+  return numWebp;
 }
 
-set<string> findQueryMatches(const map<string, set<string>>& index,
-                             const string& sentence) {
+set<string> findQueryMatches(const map<string, set<string>>& index, const string& sentence) {
   // TODO student
   return {};
 }
