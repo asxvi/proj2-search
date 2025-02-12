@@ -13,24 +13,31 @@ using namespace std;
 
 string cleanToken(const string& token) {
   int firstAlpha = -1, lastAlpha = -1;
+  bool alphaPresent = false, haveChar = false;
 
   // find index of first alpha char
   for (int i = 0; i < token.size(); i++) {
-    if (isalpha(token[i])) {
-      firstAlpha = i;
-      break;
+    if (isalnum(token[i])) {
+        if(haveChar == false){
+          firstAlpha = i;
+          haveChar = true;
+        }
+      if(isalpha(token[i])){
+        alphaPresent = true;
+        break;
+      }
     }
   }
-
+  
   for (int i = token.size()-1; i >= 0; i--) {
-    if(isalpha(token[i])){
+    if(isalnum(token[i])){
       lastAlpha = i;
       break;
     }
   }
   
-  if(firstAlpha == -1){return "";}
-  if(lastAlpha == -1){return "";}
+  if(firstAlpha == -1 || alphaPresent == false){return "";}
+  if(lastAlpha == -1 || alphaPresent == false){return "";}
 
   string concated;
   for(int i=firstAlpha; i<=lastAlpha; i++){
@@ -39,6 +46,7 @@ string cleanToken(const string& token) {
   
   return concated;
 }
+
 set<string> gatherTokens(const string& text) {
   set<string> words;
   stringstream ss(text);
@@ -78,8 +86,6 @@ int buildIndex(const string& filename, map<string, set<string> >& index) {
       i++;
     }
   }
-
-
   return numWebp;
 }
 

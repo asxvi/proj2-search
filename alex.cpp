@@ -29,7 +29,7 @@ string cleanToken(const string& token) {
       }
     }
   }
-  
+
   for (int i = token.size()-1; i >= 0; i--) {
     if(isalnum(token[i])){
       lastAlpha = i;
@@ -109,7 +109,7 @@ set<string> gatherTokens(const string& text) {
 // }
 
 int buildIndex(const string& filename, map<string, set<string> >& index) {
-  fstream file("./data/"+filename);
+  fstream file(filename);
   string line, url;
   int numWebp = 0;
 
@@ -153,12 +153,12 @@ set<string> findQueryMatches(const map<string, set<string> >& index, const strin
 
 
 int main() {
-  string uin;
-  cout << "enter string: ";
-  getline(cin, uin);
+  // string uin;
+  // cout << "enter string: ";
+  // getline(cin, uin);
 
-  string uo = cleanToken(uin);
-  cout << endl << uo << endl;
+  // string uo = cleanToken(uin);
+  // cout << endl << uo << endl;
 
   // cout << "Enter string: " ;
   // string in;
@@ -172,14 +172,14 @@ int main() {
 
   // cout << a;
 
-  // cout << "enter a string: ";
-  // string ui; 
-  // getline(cin, ui);  
-  // set<string> matches = findQueryMatches(index, ui);
+  cout << "enter a string: ";
+  string ui; 
+  getline(cin, ui);  
+  set<string> matches = findQueryMatches(index, ui);
 
-  // for(string url : matches){
-  //   cout << url << " ";
-  // }
+  for(string url : matches){
+    cout << url << " ";
+  }
 
   return 0;
 }

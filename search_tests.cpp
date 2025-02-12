@@ -14,6 +14,7 @@ TEST(CleanToken, BothEndsCleaning) {
   ASSERT_THAT(cleanToken(".HELLO."), StrEq("hello"));
   ASSERT_THAT(cleanToken("...Hello..."), StrEq("hello"));
   ASSERT_THAT(cleanToken(".\"!?heLLo!!!!"), StrEq("hello"));
+  ASSERT_THAT(cleanToken("2.\"!?heLLo!!!!2"), StrEq("2.\"!?hello!!!!2"));
 }
 
 // Tokens with punct in beginning and middle, but not end
@@ -23,6 +24,7 @@ TEST(CleanToken, StartMiddleCleaning) {
   ASSERT_THAT(cleanToken("!@*&#calCU!ator"), StrEq("calcu!ator"));
   ASSERT_THAT(cleanToken("**uU*U"), StrEq("uu*u"));
   ASSERT_THAT(cleanToken("$$$moN$$eY"), StrEq("mon$$ey"));
+  ASSERT_THAT(cleanToken("2$$$moN$$eY"), StrEq("2$$$mon$$ey"));
 }
 
 // Tokens with numbers at the end
@@ -33,6 +35,7 @@ TEST(CleanToken, MiddleEndCleaning) {
   ASSERT_THAT(cleanToken("time$$$heet$$$$$$"), StrEq("time$$$heet"));
   ASSERT_THAT(cleanToken("time@#$sheet@$@#$@#$"), StrEq("time@#$sheet"));
   ASSERT_THAT(cleanToken("t@im@es@he@et@.,.!?"), StrEq("t@im@es@he@et"));
+  ASSERT_THAT(cleanToken("t@im@es@he@et@.,.!?222"), StrEq("t@im@es@he@et@.,.!?222"));
 }
 
 // Tokens with punctuation in the actual string to keep
@@ -45,13 +48,14 @@ TEST(CleanToken, middleCleaning) {
   ASSERT_THAT(cleanToken("h#eL#Lo"), StrEq("h#el#lo"));
 }
 
-// Tokens with numbers at the end
-TEST(CleanToken, SuffixCleaning) {
+// Tokens with numbers at the beg or end
+TEST(CleanToken, NumCleaning) {
   ASSERT_THAT(cleanToken("9"), StrEq(""));
-  ASSERT_THAT(cleanToken("h9"), StrEq("h9"));
+  ASSERT_THAT(cleanToken("9h9"), StrEq("9h9"));
   ASSERT_THAT(cleanToken("hello999"), StrEq("hello999"));
   ASSERT_THAT(cleanToken("ti84"), StrEq("ti84"));
-  ASSERT_THAT(cleanToken("goat23"), StrEq("goat23"));
+  ASSERT_THAT(cleanToken("24goat23"), StrEq("24goat23"));
+  ASSERT_THAT(cleanToken("123abc"), StrEq("123abc"));
 }
 
 // Tokens with numbers at the end
@@ -72,7 +76,11 @@ TEST(CleanToken, SymbolCleaning) {
   ASSERT_THAT(cleanToken("<<<<<<XYz>>>>>>"), StrEq("xyz"));
 }
 
+//
 // GatherTokens TEST CASES
+// 
+
+// leading spaces text input
 TEST(GatherTokens, LeadingSpace){
   string text = "                 Hello my naMe is ALeX";
   set<string> expected = {"hello", "my", "name", "is", "alex"};
@@ -81,6 +89,7 @@ TEST(GatherTokens, LeadingSpace){
   << "text=\"" << text << "\"";
 }
 
+// trailing spaces text input
 TEST(GatherTokens, TrailingSpaces){
   string text = "Hello my naMe is ALeX                  ";
   set<string> expected = {"hello", "my", "name", "is", "alex"};
@@ -89,6 +98,7 @@ TEST(GatherTokens, TrailingSpaces){
   << "text=\"" << text << "\"";
 }
 
+// spaces everywhere and anywhere (not in word) text input
 TEST(GatherTokens, ManySpaces){
   string text = "Hello   my      naMe    is ALeX";
   set<string> expected = {"hello", "my", "name", "is", "alex"};
@@ -97,16 +107,19 @@ TEST(GatherTokens, ManySpaces){
   << "text=\"" << text << "\"";
 }
 
+//
 // buildIndex TEST CASES
-
+//
 
 // check that the output of running buildIndex results in an int >= 1 bc that means that atleast one url was read
 TEST(BuildIndex, NoFile){
-    string filename = "idontexist.txt"
-    string f_expected = not
-    string retTestFeedback =
-      "buildIndex(\"" + filename + "\", ...) file not found \n";
-    EXPECT_THAT(filename, Eq())    
+  string filename = "";
+  map<string, set<string>> studentIndex;
+
+  int studentNumProcesed = buildIndex(filename, studentIndex);
+  string indexTestFeedback =
+      "buildIndex(\"" + filename + "\", ...) file not found\n";
+  EXPECT_THAT(studentNumProcesed, Eq(0)) << indexTestFeedback;
 }
 
 TEST(BuildIndex, TinyTxt) {
@@ -149,6 +162,71 @@ TEST(BuildIndex, TinyTxt) {
   EXPECT_THAT(studentNumProcesed, Eq(4)) << retTestFeedback;
 }
 
+//
+// findQueryMatches Tests
+//
+map<string, set<string>> INDEX = {
+  {"hello", {"example.com", "uic.edu"}},
+  {"there", {"example.com"}},
+  {"according", {"uic.edu"}},
+  {"to", {"uic.edu"}},
+  {"all", {"example.com", "uic.edu", "random.org"}},
+  {"known", {"uic.edu"}},
+  {"laws", {"random.org"}},
+  {"of", {"random.org"}},
+  {"aviation", {"random.org"}},
+  {"a", {"uic.edu", "random.org"}},
+};
 
+TEST(FindQueryMatches, FirstNotIndex) {
+  set<string> expected;
+
+  expected = {};
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "notHere"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "NOTHERE!"), ContainerEq(expected));
+}
+
+TEST(FindQueryMatches, NotIndexWithUnion) {
+  set<string> expected;
+
+  expected = {};
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander should"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander should not"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander can not be"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander will not be here"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "ALEXANDER sta"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "MEMEMEMe me"), ContainerEq(expected));
+}
+
+TEST(FindQueryMatches, NotIndexWithIntersection) {
+  set<string> expected;
+
+  expected = {};
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander+should"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander +cant"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander+ wont"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander +should +not +be +here"), ContainerEq(expected));
+}
+
+TEST(FindQueryMatches, NotIndexWithDifference) {
+  set<string> expected;
+
+  expected = {};
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander-should"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander -will"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander- can"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander -would -not"), ContainerEq(expected));
+}
+
+TEST(FindQueryMatches, NotIndexWithCombinedQuery) {
+  set<string> expected;
+
+  expected = {};
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander-should figure+this"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander -will-probably hopefully"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander- can try+as long+as"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "alexander -would not"), ContainerEq(expected));
+}
 
 }  // namespace

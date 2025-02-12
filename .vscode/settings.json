@@ -13,6 +13,7 @@
   "files.associations": {
     "iosfwd": "cpp",
     "iostream": "cpp",
-    "set": "cpp"
+    "set": "cpp",
+    "algorithm": "cpp"
   },
 }
