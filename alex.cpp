@@ -15,63 +15,59 @@ vector<string> turnStringToVect(const string& sentence);
 string cleanToken(const string& token);
 
 string CleanSentence(const string& sentence, vector<string>& keys){
-  cout << sentence << ":   " << endl;
+  cout << "sentence: " << sentence << ":   " << endl;
   string compact, spaced;
 
   bool firstCharFound = false;
   char prev = ' ';
   
-  for(int i=0; i<sentence.size(); i++){
+  for(int i = 0; i < sentence.size(); i++){
     char c = sentence[i];
 
-    // check for special symbols. expected outcome for compact = "a+b", for spaced = "a + b"
-    if(c == '+' || c == '-'){
-      // check for space before symbol, remove it then add the symbol
-      if(compact.back() == ' ' && !compact.empty()){
+    // Check for special symbols (+, -)
+    if (c == '+' || c == '-') {
+      // Remove space before symbol in compact version
+      if (!compact.empty() && compact.back() == ' ') {
         compact.pop_back();
       }
       compact += c;
-      // do not need for space if we dont care about spaces bc ss parses it out
-      // add before symbol if no space present, else just add symbol and space
-      // if(spaced.back() != ' ' && !spaced.empty()){
-      //   spaced += ' '; 
-      // }
-      // spaced += c;
-      // if(sentence[i+1] != ' ' && i+1 < sentence.size()){
-      //   spaced += ' '; 
-      // }
-      spaced += ' ';
-    }
 
-    // if the curr char is a space and previous char was also space
-    else if(isspace(c)){
-      if(prev != ' ' && firstCharFound){
+      // Handle spacing rules for spaced version
+      if (!spaced.empty() && spaced.back() != ' ') {
+        spaced += ' '; 
+      }
+      spaced += c;
+
+      // Ensure only one space after if needed
+      if (i + 1 < sentence.size() && sentence[i + 1] != ' ') {
+        spaced += ' ';
+      }
+    }
+    // Handle spaces
+    else if (isspace(c)) {
+      // if (i > 0 && i + 1 < sentence.size() && isalnum(sentence[i - 1]) && isalnum(sentence[i + 1])) {
+      //   continue; // Skip spaces between two alphanumeric characters
+      // }
+      if (prev != ' ' && firstCharFound) {
         spaced += ' ';
         compact += ' ';
-        
-        if(prev == '+' || prev == '-'){
-          compact.pop_back();
-        }
       }
     }
-
-    //otherwise add normal char and then update previous char to curr right before switch
+    // Normal characters
     else {
-      if(!isspace(c)){
-        compact += c;
-        spaced += c;
-        firstCharFound = true;
-      }
+      compact += c;
+      spaced += c;
+      firstCharFound = true;
     }
-    prev = c;
-  }  
-  // cout << "compact: |" << compact << endl;
-  // cout << "Spaced: |" << spaced << endl;
 
-  // directly modify the vector of words, and then return the compact string with no spaces
+    prev = c;
+  }
+
+  // Convert the spaced version into a vector of words
   keys = turnStringToVect(spaced);
   return compact;
 }
+
 
 // lets    see-if     this+ works   or -not
 vector<string> turnStringToVect(const string& sentence){
@@ -206,42 +202,22 @@ int buildIndex(const string& filename, map<string, set<string> >& index) {
 }
 
 set<string> findQueryMatches(const map<string, set<string> >& index, const string& sentence) {
-  stringstream ss(sentence);
-  string word;
-  vector<string> ordered_input;
+  vector<string> keysToCompare;
+  string cleaned = CleanSentence(sentence, keysToCompare);
+  cout << cleaned;
+
+  cout << "before the loop \n";
+  for(string word : keysToCompare){
+    cout << word << endl;
+  }
 
   // our return set of urls after complete query is finished
   set<string> rv;
   
-  string cleanedS = cleanToken(sentence);
-  cout << cleanedS;
-  
-  //create a vector with all of the words in user sentence input
-  while(ss >> word){
-    // if(index.find(word) != index.end()){
-      ordered_input.push_back(cleanToken(word));
-      cout << word;
-    // }
-  }
-  
-  // special case where there is only 1 string input. 
-  // go through every word[KEY] and their url(s)[VALUE]. if the key matches the sentence string
-  // then we add every url[VALUE] that has that KEY to our return set, rv
-  // if(ordered_input.size() == 1){
-  // index.at(ordered_input[0]);
-  //     for(pair<string, set<string> > p : index){
-  //       if(ordered_input[0] == p.first){
-  //         for(string url : p.second){
-  //           rv.insert(url);  
-  //         }
-  //     }
-  //   }
-  // }
-
   int numOperations=0;
-  if (ordered_input.size() == 1) {
+  if (keysToCompare.size() == 1) {
     cout << "size 1";
-    return index.at(ordered_input[0]);  // Direct lookup
+    return index.at(keysToCompare[0]);  // Direct lookup
   }
   else{
 
@@ -252,12 +228,12 @@ set<string> findQueryMatches(const map<string, set<string> >& index, const strin
         numOperations++;
 
         for(pair<string, set<string> > p : index){
-          if(ordered_input[numOperations-1] == p.first){
+          if(keysToCompare[numOperations-1] == p.first){
             for(string url : p.second){
               a.insert(url);  
             }
           }
-          else if(ordered_input[numOperations] == p.first){
+          else if(keysToCompare[numOperations] == p.first){
             for(string url : p.second){
               b.insert(url);  
             }
@@ -345,22 +321,22 @@ int main() {
   int a = buildIndex(filename, index);
 
   // cout << a;
+// ///
+  cout << "enter a string: ";
+  string ui; 
+  getline(cin, ui);  
+  set<string> matches = findQueryMatches(index, ui);
 
-  // cout << "enter a string: ";
-  // string ui; 
-  // getline(cin, ui);  
-  // set<string> matches = findQueryMatches(index, ui);
 
-  // for(string url : matches){
-  //   cout << url << ", ";
-  // }
-
-  string inp;
-  cout << "input sentence: ";
-  getline(cin, inp);
+  // string inp;
+  // cout << "input sentence: ";
+  // getline(cin, inp);
   // inp = "        hello my    name+is alex -lets run+ this   ok";
-  vector<string> alexander;
-  string b = CleanSentence(inp, alexander);
-  cout << "\n\n" << b;
+  // vector<string> alexander;
+  // string b = CleanSentence(inp, alexander);
+  // cout << "\n\nversus \n\n" << b;
+
+
+
   return 0;
 }
