@@ -11,10 +11,83 @@
 
 using namespace std;
 
+vector<string> turnStringToVect(const string& sentence);
+string cleanToken(const string& token);
+
+string CleanSentence(const string& sentence, vector<string>& keys){
+  cout << sentence << ":   " << endl;
+  string compact, spaced;
+
+  bool firstCharFound = false;
+  char prev = ' ';
+  
+  for(int i=0; i<sentence.size(); i++){
+    char c = sentence[i];
+
+    // check for special symbols. expected outcome for compact = "a+b", for spaced = "a + b"
+    if(c == '+' || c == '-'){
+      // check for space before symbol, remove it then add the symbol
+      if(compact.back() == ' ' && !compact.empty()){
+        compact.pop_back();
+      }
+      compact += c;
+      // do not need for space if we dont care about spaces bc ss parses it out
+      // add before symbol if no space present, else just add symbol and space
+      // if(spaced.back() != ' ' && !spaced.empty()){
+      //   spaced += ' '; 
+      // }
+      // spaced += c;
+      // if(sentence[i+1] != ' ' && i+1 < sentence.size()){
+      //   spaced += ' '; 
+      // }
+      spaced += ' ';
+    }
+
+    // if the curr char is a space and previous char was also space
+    else if(isspace(c)){
+      if(prev != ' ' && firstCharFound){
+        spaced += ' ';
+        compact += ' ';
+        
+        if(prev == '+' || prev == '-'){
+          compact.pop_back();
+        }
+      }
+    }
+
+    //otherwise add normal char and then update previous char to curr right before switch
+    else {
+      if(!isspace(c)){
+        compact += c;
+        spaced += c;
+        firstCharFound = true;
+      }
+    }
+    prev = c;
+  }  
+  // cout << "compact: |" << compact << endl;
+  // cout << "Spaced: |" << spaced << endl;
+
+  // directly modify the vector of words, and then return the compact string with no spaces
+  keys = turnStringToVect(spaced);
+  return compact;
+}
+
+// lets    see-if     this+ works   or -not
+vector<string> turnStringToVect(const string& sentence){
+  stringstream ss(sentence);
+  string word;
+  vector<string> ordered_input;
+
+  while(ss >> word){      
+    ordered_input.push_back(cleanToken(word));
+  }
+  return ordered_input;
+}
+
 string cleanToken(const string& token) {
   int firstAlpha = -1, lastAlpha = -1;
   bool alphaPresent = false, haveChar = false;
-
 
   // find index of first alpha char
   for (int i = 0; i < token.size(); i++) {
@@ -58,9 +131,7 @@ set<string> gatherTokens(const string& text) {
   }
   
   words.erase("");
-  // for(string s : words){
-  //   cout << s << endl;
-  // }
+
   return words;
 }
 
@@ -142,10 +213,14 @@ set<string> findQueryMatches(const map<string, set<string> >& index, const strin
   // our return set of urls after complete query is finished
   set<string> rv;
   
+  string cleanedS = cleanToken(sentence);
+  cout << cleanedS;
+  
   //create a vector with all of the words in user sentence input
   while(ss >> word){
     // if(index.find(word) != index.end()){
       ordered_input.push_back(cleanToken(word));
+      cout << word;
     // }
   }
   
@@ -188,27 +263,49 @@ set<string> findQueryMatches(const map<string, set<string> >& index, const strin
             }
           }
         }
-
-        // for(pair<string, set<string> > p : index){
-        //   if(ordered_input[numOperations] == p.first){
-        //     for(string url : p.second){
-        //       b.insert(url);  
-        //     }
-        //   }
-        // }
-        
         set_union(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
-        
+      }
 
+      //special case, when numOperations is zero, we need to intersect the set of the first 2 words
+    //   else if(sentence[i] == '+'){
+    //     numOperations++;
+    //     if(numOperations == 1){
+    //       set<string> a,b;
 
-      }
-      else if(sentence[i] == '+'){
-        //set union
-      }
-      else if(sentence[i] == '-'){
-        //set union
-      }
-    }
+    //       for(pair<string, set<string> > p : index){
+    //         if(ordered_input[numOperations-1] == p.first){
+    //           for(string url : p.second){
+    //             cout << "yo";
+    //             a.insert(url);  
+    //           }
+    //         }
+    //         else if(ordered_input[numOperations] == p.first){
+    //           for(string url : p.second){
+    //             cout << "ea";
+    //             b.insert(url);  
+    //           }
+    //         }
+    //       }
+    //       // set_intersection(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+    //     // }
+    //     // else{
+    //     //   set<string> a = rv;
+    //     //   set<string> b;
+
+    //     //   for(pair<string, set<string> > p : index){
+    //     //     if(ordered_input[numOperations] == p.first){
+    //     //       for(string url : p.second){
+    //     //         b.insert(url);  
+    //     //       }
+    //     //     }
+    //     //   }
+    //     //   set_intersection(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+    //     // }
+    //   }
+    //   else if(sentence[i] == '-'){
+    //     //set union
+    //   }
+    // }
   }
 
 
@@ -217,7 +314,7 @@ set<string> findQueryMatches(const map<string, set<string> >& index, const strin
   //   if(sentence[i] == ' '){
 
   //   }
-  // }
+}
 
     int i=0;
     for(string word : rv){
@@ -249,14 +346,21 @@ int main() {
 
   // cout << a;
 
-  cout << "enter a string: ";
-  string ui; 
-  getline(cin, ui);  
-  set<string> matches = findQueryMatches(index, ui);
+  // cout << "enter a string: ";
+  // string ui; 
+  // getline(cin, ui);  
+  // set<string> matches = findQueryMatches(index, ui);
 
-  for(string url : matches){
-    cout << url << ", ";
-  }
+  // for(string url : matches){
+  //   cout << url << ", ";
+  // }
 
+  string inp;
+  cout << "input sentence: ";
+  getline(cin, inp);
+  // inp = "        hello my    name+is alex -lets run+ this   ok";
+  vector<string> alexander;
+  string b = CleanSentence(inp, alexander);
+  cout << "\n\n" << b;
   return 0;
 }

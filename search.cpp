@@ -99,28 +99,109 @@ set<string> findQueryMatches(const map<string, set<string> >& index, const strin
 
   // our return set of urls after complete query is finished
   set<string> rv;
-
-  // create a vector with all of the words in user sentence input
-  while (ss >> word) {
-    if (index.find(word) != index.end()) {
+  
+  string cleanedS = cleanToken(sentence);
+  cout << cleanedS;
+  
+  //create a vector with all of the words in user sentence input
+  while(ss >> word){
+    // if(index.find(word) != index.end()){
       ordered_input.push_back(cleanToken(word));
-    }
+      cout << word;
+    // }
   }
+  
+  // special case where there is only 1 string input. 
+  // go through every word[KEY] and their url(s)[VALUE]. if the key matches the sentence string
+  // then we add every url[VALUE] that has that KEY to our return set, rv
+  // if(ordered_input.size() == 1){
+  // index.at(ordered_input[0]);
+  //     for(pair<string, set<string> > p : index){
+  //       if(ordered_input[0] == p.first){
+  //         for(string url : p.second){
+  //           rv.insert(url);  
+  //         }
+  //     }
+  //   }
+  // }
 
-  // special case where there is only 1 string input.
-  // go through every word[KEY] and their url(s)[VALUE]. if the key matches the
-  // sentence string then we add every url[VALUE] that has that KEY to our
-  // return set, rv
+  int numOperations=0;
   if (ordered_input.size() == 1) {
-    for (pair<string, set<string> > p : index) {
-      if (ordered_input[0] == p.first) {
-        for (string url : p.second) {
-          rv.insert(url);
+    cout << "size 1";
+    return index.at(ordered_input[0]);  // Direct lookup
+  }
+  else{
+
+    // go through every character in sentence, and stop at 3 specific chars: ' ', -, +
+    for(int i=0; i<sentence.size(); i++){
+      if(sentence[i] == ' '){
+        set<string> a, b;
+        numOperations++;
+
+        for(pair<string, set<string> > p : index){
+          if(ordered_input[numOperations-1] == p.first){
+            for(string url : p.second){
+              a.insert(url);  
+            }
+          }
+          else if(ordered_input[numOperations] == p.first){
+            for(string url : p.second){
+              b.insert(url);  
+            }
+          }
         }
+        set_union(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+      }
+
+      //special case, when numOperations is zero, we need to intersect the set of the first 2 words
+      else if(sentence[i] == '+'){
+        numOperations++;
+        if(numOperations == 1){
+          set<string> a,b;
+
+          for(pair<string, set<string> > p : index){
+            if(ordered_input[numOperations-1] == p.first){
+              for(string url : p.second){
+                cout << "yo";
+                a.insert(url);  
+              }
+            }
+            else if(ordered_input[numOperations] == p.first){
+              for(string url : p.second){
+                cout << "ea";
+                b.insert(url);  
+              }
+            }
+          }
+          // set_intersection(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+        // }
+        // else{
+        //   set<string> a = rv;
+        //   set<string> b;
+
+        //   for(pair<string, set<string> > p : index){
+        //     if(ordered_input[numOperations] == p.first){
+        //       for(string url : p.second){
+        //         b.insert(url);  
+        //       }
+        //     }
+        //   }
+        //   set_intersection(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+        // }
+      }
+      else if(sentence[i] == '-'){
+        //set union
       }
     }
   }
-  return rv;
+
+
+  // might parse out by characters searching for + - ' '
+  // for(int i=0; i<sentence.size(); i++){
+  //   if(sentence[i] == ' '){
+
+  //   }
+  }
 }
 
 void searchEngine(const string& filename) {
