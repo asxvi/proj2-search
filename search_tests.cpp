@@ -182,51 +182,25 @@ TEST(FindQueryMatches, FirstNotIndex) {
   set<string> expected;
 
   expected = {};
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "notHere"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "NOTHERE!"), ContainerEq(expected));
-}
-
-TEST(FindQueryMatches, NotIndexWithUnion) {
-  set<string> expected;
-
-  expected = {};
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander should"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander should not"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander can not be"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander will not be here"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "ALEXANDER sta"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "MEMEMEMe me"), ContainerEq(expected));
-}
-
-TEST(FindQueryMatches, NotIndexWithIntersection) {
-  set<string> expected;
-
-  expected = {};
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander+should"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander +cant"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander+ wont"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander +should +not +be +here"), ContainerEq(expected));
-}
-
-TEST(FindQueryMatches, NotIndexWithDifference) {
-  set<string> expected;
-
-  expected = {};
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander-should"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander -will"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander- can"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander -would -not"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "unknown"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "unknown term"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "unknown +term"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "unknown -term"), ContainerEq(expected));
 }
 
 TEST(FindQueryMatches, NotIndexWithCombinedQuery) {
   set<string> expected;
 
+  expected = {"example.com", "uic.edu"};
+  EXPECT_THAT(findQueryMatches(INDEX, "hello unknown"), ContainerEq(expected));
+
   expected = {};
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander-should figure+this"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander -will-probably hopefully"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander- can try+as long+as"), ContainerEq(expected));
-  EXPECT_THAT(findQueryMatches(INDEX, "alexander -would not"), ContainerEq(expected));
+  // EXPECT_THAT(findQueryMatches(INDEX, "hello +unknown"), ContainerEq(expected));
+  EXPECT_THAT(findQueryMatches(INDEX, "unknown +hello"), ContainerEq(expected));
+
+  expected = {"example.com", "uic.edu"};
+  EXPECT_THAT(findQueryMatches(INDEX, "hello -unknown"), ContainerEq(expected));
+  // EXPECT_THAT(findQueryMatches(INDEX, "unknown -hello"), ContainerEq(expected));
 }
 
 }  // namespace

@@ -14,6 +14,131 @@ using namespace std;
 vector<string> turnStringToVect(const string& sentence);
 string cleanToken(const string& token);
 
+
+// parameters: index: the map os words[KEYS] and their respective urls[VALUES], 
+//             keysToCompare: our cleaned vector with just words
+//             numOperations: the number of +,- or spaces there are
+//             foundOperator: determine what we use for set a. If true, we use previous out rv.
+//             rv: our return string we use to also directly access what was previously there if foundOperator is true
+set<string> unionOperation(const map<string, set<string> >& index, vector<string> keysToCompare, int numOperations, bool foundOperator, set<string>& rv){
+  if(!foundOperator){
+    cout << "not found in union" << endl;
+    set<string> a, b;
+
+    for (pair<string, set<string> > p : index) {
+      if (numOperations >= 1 && keysToCompare[numOperations - 1] == p.first) {
+        for (string url : p.second) {
+          a.insert(url);
+        }
+      } 
+      if (keysToCompare[numOperations] == p.first) {
+        for (string url : p.second) {
+          b.insert(url);
+        }
+      }
+    }
+    set_union(a.begin(), a.end(), b.begin(), b.end(),inserter(rv, rv.begin()));
+  }
+  else{
+    cout << "found in union" << endl;
+    set<string> a = rv, b;
+
+    for (pair<string, set<string> > p : index) {
+      if (keysToCompare[numOperations] == p.first) {
+        for (string url : p.second) {
+          b.insert(url);
+        }
+      }
+    }
+    set_union(a.begin(), a.end(), b.begin(), b.end(),inserter(rv, rv.begin()));
+  }
+
+  return rv;
+}
+
+
+// parameters: index: the map os words[KEYS] and their respective urls[VALUES], 
+//             keysToCompare: our cleaned vector with just words
+//             numOperations: the number of +,- or spaces there are
+//             foundOperator: determine what we use for set a. If true, we use previous out rv.
+//             rv: our return string we use to also directly access what was previously there if foundOperator is true
+set<string> intersectionOperation(const map<string, set<string> >& index, vector<string> keysToCompare, int numOperations, bool foundOperator, set<string>& rv){
+  if(!foundOperator){
+    cout << "not found in intersection" << endl;
+    set<string> a, b;
+
+    for (pair<string, set<string> > p : index) {
+      if (numOperations >= 1 && keysToCompare[numOperations - 1] == p.first) {
+        for (string url : p.second) {
+          a.insert(url);
+        }
+      } else if (keysToCompare[numOperations] == p.first) {
+        for (string url : p.second) {
+          b.insert(url);
+        }
+      }
+    }
+    set_intersection(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+  }
+  else{
+    cout << "found in intersection" << endl;
+    set<string> a = rv, b;
+
+    for (pair<string, set<string> > p : index) {
+      if (keysToCompare[numOperations] == p.first) {
+        for (string url : p.second) {
+          b.insert(url);
+        }
+      }
+    }
+    set_intersection(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+  }
+  
+  return rv;
+}
+
+// parameters: index: the map os words[KEYS] and their respective urls[VALUES], 
+//             keysToCompare: our cleaned vector with just words
+//             numOperations: the number of +,- or spaces there are
+//             foundOperator: determine what we use for set a. If true, we use previous out rv.
+set<string> differenceOperation(const map<string, set<string> >& index, vector<string> keysToCompare, int numOperations, bool foundOperator, set<string>& rv){
+  
+  if(!foundOperator){
+    cout << "not found in diff" << endl;
+    set<string> a, b;
+
+    for (pair<string, set<string> > p : index) {
+      if (numOperations >= 1 && keysToCompare[numOperations - 1] == p.first) {
+        for (string url : p.second) {
+          a.insert(url);
+        }
+      } else if (keysToCompare[numOperations] == p.first) {
+        for (string url : p.second) {
+          b.insert(url);
+        }
+      }
+    }
+    set_difference(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+  }
+  else{
+    cout << "found in diff" << endl;
+    set<string> a = rv, b;
+
+    for (pair<string, set<string> > p : index) {
+      if (keysToCompare[numOperations] == p.first) {
+        for (string url : p.second) {
+          b.insert(url);
+        }
+      }
+    }
+    set_difference(a.begin(), a.end(), b.begin(), b.end(), inserter(rv, rv.begin()));
+
+  }
+  return rv;
+}
+
+
+ 
 string CleanSentence(const string& sentence, vector<string>& keys,
                      string& compactString) {
   cout << "our dirty sentence: " << sentence << ":   " << endl << endl;
@@ -187,103 +312,60 @@ int buildIndex(const string& filename, map<string, set<string> >& index) {
   return numWebp;
 }
 
+
+//want to keep + - in vector
+// hello "+" "bye" hello "" bye
 set<string> findQueryMatches(const map<string, set<string> >& index,
                              const string& sentence) {
   vector<string> keysToCompare;
-  string cleaned, compact;
-  cleaned = CleanSentence(sentence, keysToCompare, compact);
-  set<string> rv;
-  // our return set of urls after complete query is finished
+  string compact, cleaned = CleanSentence(sentence, keysToCompare, compact);  
+  set<string> rv, finalUrls;
 
   // the number of +, - or spaces (|)
   int numOperations = 0;
 
   if (keysToCompare.size() == 1) {
-    cout << "size 1" << endl;           ////////
-    return index.at(keysToCompare[0]);  // Direct lookup
+    if(index.find(keysToCompare[0]) != index.end()){
+      return index.at(keysToCompare[0]);  // Direct lookup
+    }
+    else{
+      return {};
+    }
   }
 
-  // once youve done an operation, the first set will always be a copy of rv and
-  // we can either |, +, or - to it
-
   else {
-    cout << "\n\n\nmore than one word.      " << compact << endl;
+    // once youve done an operation, the first set will always be a copy of rv and we can either |, +, or - to it
+    bool foundOperator = false;
 
-    int count = 0;
-    // go through every character in sentence, and stop at 3 specific chars: '
-    // ', -, +
+    // go through every character in sentence, and stop at 3 specific chars: '', -, +
     for (int i = 0; i < compact.size(); i++) {
-      // UNION looking for SPACES
-      // union can only happen between 2 words. can not happen in end cases
-      if (compact[i] == ' ' && i >= 1) {
-        set<string> a, b;
-        numOperations++;
 
-        for (pair<string, set<string> > p : index) {
-          if (keysToCompare[numOperations - 1] == p.first) {
-            for (string url : p.second) {
-              a.insert(url);
-            }
-          } else if (keysToCompare[numOperations] == p.first) {
-            for (string url : p.second) {
-              b.insert(url);
-            }
-          }
+      // if(!foundOperator){
+
+        // UNION looking for SPACES, only between 2 words, not in end cases
+        if (compact[i] == ' ' && i >= 1) {      
+          numOperations++;
+          finalUrls = unionOperation(index, keysToCompare, numOperations, foundOperator, rv);
+          foundOperator = true;
         }
-        set_union(a.begin(), a.end(), b.begin(), b.end(),
-                  inserter(rv, rv.begin()));
-      }
 
-      // INTERSECTION looking for PLUS +
-      else if (compact[i] == '+' && i >= 1) {
-        set<string> a, b;
-        numOperations++;
-
-        for (pair<string, set<string> > p : index) {
-          if (keysToCompare[numOperations - 1] == p.first) {
-            for (string url : p.second) {
-              a.insert(url);
-            }
-          } else if (keysToCompare[numOperations] == p.first) {
-            for (string url : p.second) {
-              b.insert(url);
-            }
-          }
+        // INTERSECTION looking for PLUS +, only between 2 words, not in end cases
+        else if (compact[i] == '+' && i >= 1) {
+          numOperations++;
+          finalUrls = intersectionOperation(index, keysToCompare, numOperations, foundOperator, rv);
+          foundOperator = true;
         }
-        set_intersection(a.begin(), a.end(), b.begin(), b.end(),
-                         inserter(rv, rv.begin()));
-      }
 
-      // SET DIFFERENCE looking for MINUS -
-      else if (compact[i] == '-' && i >= 1) {
-        set<string> a, b;
-        numOperations++;
-
-        for (pair<string, set<string> > p : index) {
-          if (keysToCompare[numOperations - 1] == p.first) {
-            for (string url : p.second) {
-              a.insert(url);
-            }
-          } else if (keysToCompare[numOperations] == p.first) {
-            for (string url : p.second) {
-              b.insert(url);
-            }
-          }
+        // SET DIFFERENCE looking for MINUS -, only between 2 words, not in end cases
+        else if (compact[i] == '-' && i >= 1) {
+          numOperations++;
+          finalUrls = differenceOperation(index, keysToCompare, numOperations, foundOperator, rv);
+          foundOperator = true;
         }
-        set_difference(a.begin(), a.end(), b.begin(), b.end(),
-                       inserter(rv, rv.begin()));
-      }
-
     }  // for iter every char
   }  // else statement
 
-  // int i=0;
-  // for(string word : rv){
-  //   cout << i << " :" << word << "." << endl;
-  //   i++;
-  // }
-
-  return rv;
+  return finalUrls;
 }  // main close
 
 int main() {
@@ -294,10 +376,11 @@ int main() {
   string ui;
   // cout << "enter a string: ";
   // getline(cin, ui);
-  // ui = "   i    +   figure    lets see-how    this+    works right-now at
-  // -moment    "; ui = "       red     gre-en    blue    milk"; ui = "
-  // fish+bread";
-  ui = "       fish- bread";
+  ui = "   i    +   figure    lets see-how    this+    works right-now at -moment    "; 
+  // ui = "       red     gre-en    blue    milk"; 
+  // ui = "fish+bread";
+  // ui = "eggs+ fish red- yellow";
+  // ui = "a ";
   set<string> matches = findQueryMatches(index, ui);
 
   cout << "corresponding urls in earnest: " << endl;

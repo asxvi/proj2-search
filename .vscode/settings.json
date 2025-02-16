@@ -16,6 +16,14 @@
     "set": "cpp",
     "algorithm": "cpp",
     "string": "cpp",
-    "vector": "cpp"
+    "vector": "cpp",
+    "deque": "cpp",
+    "list": "cpp",
+    "map": "cpp",
+    "unordered_map": "cpp",
+    "unordered_set": "cpp",
+    "functional": "cpp",
+    "ostream": "cpp",
+    "fstream": "cpp"
   },
 }
