@@ -198,7 +198,7 @@ TEST_F(SearchEngine, uiccs_news) {
   vector<string> expectedLines = {
       // Info output
       "Stand by while building index...",
-      "Indexed 85 pages containing 7032 unique terms",
+      "Indexed 85 pages containing 7032 unique terms",          ////////////////////////////////////////////////////////
       // Query "build"
       "Enter query sentence (press enter to quit): Found 16 matching pages",
       "https://cs.uic.edu/news-stories/andres-tapia-receives-scholarships-to-attend-tapia-conference-great-minds-in-stem-conference/",
